@@ -1,0 +1,47 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Transform": "AWS::Serverless-2016-10-31",
+  "Description": "An AWS Serverless Application.",
+  "Parameters": {
+
+  },
+  "Resources": {
+
+    "SaveTransactionToDB": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "KinesisDemo::KinesisDemo.LambdaEntryPoint::SaveTransactionToDB",
+        "Runtime": "dotnetcore2.1",
+        "CodeUri": "",
+        "Timeout": 30
+      }
+    },
+    "PublishTransactionToStreamQueuee": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "KinesisDemo::KinesisDemo.LambdaEntryPoint::PublishTransactionToStreamQueuee",
+        "Runtime": "dotnetcore2.1",
+        "CodeUri": "",
+        "Timeout": 30
+      }
+    },
+    "OnKinesisTrigger": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "KinesisDemo::KinesisDemo.LambdaEntryPoint::OnKinesisTrigger",
+        "Runtime": "dotnetcore2.1",
+        "CodeUri": "",
+        "Timeout": 30
+      }
+    },
+    "OnCloudWatchTrigger": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "Handler": "KinesisDemo::KinesisDemo.LambdaEntryPoint::OnCloudWatchTrigger",
+        "Runtime": "dotnetcore2.1",
+        "CodeUri": "",
+        "Timeout": 30
+      }
+    }
+  }
+}

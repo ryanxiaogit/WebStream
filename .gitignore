@@ -1,0 +1,10 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/KinesisDemo/bin
+/KinesisDemo/obj
+/KinesisDemo/Business/Response/SaveTransactionResponse.cs
+/WebApi/bin/Debug/netcoreapp2.1
+/.vs/LambdaForKinesis/v15
+/WebApi/obj

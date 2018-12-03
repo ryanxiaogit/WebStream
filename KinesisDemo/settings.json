@@ -1,0 +1,11 @@
+{
+  "TransactionManager": {
+    "Topic": "TransactionDemo"
+  },
+  "StreamMessage": {
+    "StreamName": "DemoTransaction"
+  },
+  "DynamoDBOptions": {
+    "TableName": "TransactionDemo"
+  }
+}
