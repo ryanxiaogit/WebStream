@@ -1,4 +1,5 @@
 ﻿using Amazon.Kinesis;
+using KinesisDemo.Business.Response;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ namespace KinesisDemo.Services.StreamMessage
 {
     public interface IStreamMessageProducer
     {
-        Task PublishStream(string topic, Stream data);
+        Task<PublishTransactionResponse> PublishStream(string topic, Stream data);
     }
 
     public class StreamProducer : IStreamMessageProducer
@@ -24,19 +25,25 @@ namespace KinesisDemo.Services.StreamMessage
             _options = options.Value;
         }
 
-        public async Task PublishStream(string topic, Stream data)
+        public async Task<PublishTransactionResponse> PublishStream(string topic, Stream data)
         {
+            var response = new PublishTransactionResponse();
             using (MemoryStream memoryStream = new MemoryStream())
             {
                 await data.CopyToAsync(memoryStream);
 
-                await _kinesis.PutRecordAsync(new Amazon.Kinesis.Model.PutRecordRequest
+                var putRecordResponse = await _kinesis.PutRecordAsync(new Amazon.Kinesis.Model.PutRecordRequest
                 {
                     Data = memoryStream,
                     PartitionKey = topic,
                     StreamName = _options.StreamName
                 });
+
+                response.ShardId = putRecordResponse.ShardId;
+                response.SequenceNumber = putRecordResponse.SequenceNumber;
             }
+
+            return response;
         }
     }
 }

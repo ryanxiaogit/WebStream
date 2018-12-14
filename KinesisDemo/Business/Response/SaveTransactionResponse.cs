@@ -9,5 +9,7 @@ namespace KinesisDemo.Business.Response
     {
         public string Message { get; set; }
         public string ResponseCode { get; set; }
+
+        public string Data { get; set; }
     }
 }

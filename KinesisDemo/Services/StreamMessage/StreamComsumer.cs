@@ -11,7 +11,7 @@ namespace KinesisDemo.Services.StreamMessage
 {
     public interface IStreamMessageComsumer
     {
-        Task<List<DataRecord>> GetStream(string streamName, int limit = 10000);
+        Task<List<DataRecord>> GetStream(string shardId, string startingSequenceNumber, int limit = 10000);
     }
     public class StreamComsumer : IStreamMessageComsumer
     {
@@ -23,11 +23,19 @@ namespace KinesisDemo.Services.StreamMessage
             _options = options.Value;
         }
 
-        public async Task<List<DataRecord>> GetStream(string topic, int limit = 10000)
+        public async Task<List<DataRecord>> GetStream(string shardId, string startingSequenceNumber, int limit = 10000)
         {
+            var siResponse = await _kinesis.GetShardIteratorAsync(new Amazon.Kinesis.Model.GetShardIteratorRequest
+            {
+                ShardId = shardId,
+                ShardIteratorType = ShardIteratorType.AT_SEQUENCE_NUMBER,
+                StartingSequenceNumber = startingSequenceNumber,
+                StreamName = _options.StreamName
+            });
+
             var response = await _kinesis.GetRecordsAsync(new Amazon.Kinesis.Model.GetRecordsRequest
             {
-                ShardIterator = topic,
+                ShardIterator = siResponse.ShardIterator,
                 Limit = limit
             });
 

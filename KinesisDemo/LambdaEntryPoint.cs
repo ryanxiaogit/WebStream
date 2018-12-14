@@ -95,31 +95,31 @@ namespace KinesisDemo
         /// <returns></returns>
         public async Task OnKinesisTrigger(KinesisEvent kinesisEvent, ILambdaContext context)
         {
-            var record = kinesisEvent.Records.FirstOrDefault();
-            if (record == null)
-            {
-                _logger.Log(LogLevel.Error, "record is not found in Kinesis", kinesisEvent);
-                return;
-            }
+            //var record = kinesisEvent.Records.FirstOrDefault();
+            //if (record == null)
+            //{
+            //    _logger.Log(LogLevel.Error, "record is not found in Kinesis", kinesisEvent);
+            //    return;
+            //}
 
-            _logger.Log(LogLevel.Information, "kinesis received the stream and the stream will be saved in db");
-            var response = await _transactionManager.SaveTransactionStream(record.Kinesis.Data);
-            if (response.ResponseCode != "200")
-            {
-                _logger.Log(LogLevel.Error, "Triggered by kinesis, but failed to save data.", record.Kinesis.Data);
-            }
+            //_logger.Log(LogLevel.Information, "kinesis received the stream and the stream will be saved in db");
+            //var response = await _transactionManager.SaveTransactionStream(record.Kinesis.Data);
+            //if (response.ResponseCode != "200")
+            //{
+            //    _logger.Log(LogLevel.Error, "Triggered by kinesis, but failed to save data.", record.Kinesis.Data);
+            //}
         }
 
         public async Task OnCloudWatchTrigger(CloudWatchEvent cloudWatchEvent, ILambdaContext context)
         {
-            var record = (await _transactionManager.GetTransactionStreamFromKinesis()).FirstOrDefault();
+            //var record = (await _transactionManager.GetTransactionStreamFromKinesis(cloudWatchEvent.ShardIterator)).FirstOrDefault();
 
-            _logger.Log(LogLevel.Information, "the stream will be saved in db");
-            var response = await _transactionManager.SaveTransactionStream(record.Data);
-            if (response.ResponseCode != "200")
-            {
-                _logger.Log(LogLevel.Error, "Triggered by CloudWatch, but failed to save data.", record.Data);
-            }
+            //_logger.Log(LogLevel.Information, "the stream will be saved in db");
+            //var response = await _transactionManager.SaveTransactionStream(record.Data);
+            //if (response.ResponseCode != "200")
+            //{
+            //    _logger.Log(LogLevel.Error, "Triggered by CloudWatch, but failed to save data.", record.Data);
+            //}
         }
     }
 }

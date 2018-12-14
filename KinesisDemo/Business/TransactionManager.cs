@@ -21,10 +21,10 @@ namespace KinesisDemo.Business
 {
     public interface ITransactionManager
     {
-        Task<SaveTransactionResponse> PublishTransactionStreamToKinesis(MemoryStream msTransaction);
+        Task<PublishTransactionResponse> PublishTransactionStreamToKinesis(MemoryStream msTransaction);
         Task<SaveTransactionResponse> SaveTransactionStream(TransactionData transaction);
         Task<SaveTransactionResponse> SaveTransactionStream(MemoryStream msTransaction);
-        Task<List<DataRecord>> GetTransactionStreamFromKinesis();
+        Task<List<DataRecord>> GetTransactionStreamFromKinesis(string shardId, string startingSequenceNumber, int limit = 10000);
     }
 
     public class TransactionManager : ITransactionManager
@@ -93,25 +93,26 @@ namespace KinesisDemo.Business
             }
             return response;
         }
-        public async Task<SaveTransactionResponse> PublishTransactionStreamToKinesis(MemoryStream msTransaction)
+        public async Task<PublishTransactionResponse> PublishTransactionStreamToKinesis(MemoryStream msTransaction)
         {
             msTransaction.Position = 0;
-            var response = new SaveTransactionResponse
-            {
-                Message = "Save successfully",
-                ResponseCode = "200"
-            };
+            PublishTransactionResponse response = null;
             var transaction = DeserializeToObject<TransactionData>(msTransaction);
             try
             {
-                await _streamProducer.PublishStream(_transactionManagerOptions.Topic, msTransaction);
+                response = await _streamProducer.PublishStream(_transactionManagerOptions.Topic, msTransaction);
+                response.Message = "Save successfully";
+                response.ResponseCode = "200";
                 msTransaction.Dispose();
             }
             catch (Exception ex)
             {
                 _logger.Log(LogLevel.Error, ex.Message);
-                response.Message = "Save is failed, Please check log for the details";
-                response.ResponseCode = "500";
+                response = new PublishTransactionResponse
+                {
+                    Message = "Save is failed, Please check log for the details",
+                    ResponseCode = "500"
+                };
             }
             return response;
         }
@@ -134,12 +135,20 @@ namespace KinesisDemo.Business
             }
             return obj;
         }
-        public async Task<List<DataRecord>> GetTransactionStreamFromKinesis()
+        public async Task<List<DataRecord>> GetTransactionStreamFromKinesis(string shardId, string startingSequenceNumber, int limit = 10000)
         {
-            var records = await _streamComsumer.GetStream(_transactionManagerOptions.Topic);
-            if (records?.Count == 0)
+            var records = new List<DataRecord>();
+            try
             {
-                _logger.Log(LogLevel.Error, $"record is not found in Kinesis, Topic {_transactionManagerOptions.Topic}");
+                records = await _streamComsumer.GetStream(shardId, startingSequenceNumber, limit);
+                if (records?.Count == 0)
+                {
+                    _logger.Log(LogLevel.Error, $"record is not found in Kinesis, Topic {_transactionManagerOptions.Topic}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Log(LogLevel.Error, "Error when saving");
             }
 
             _logger.Log(LogLevel.Information, "kinesis received the stream and the stream will be saved in db");
